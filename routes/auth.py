@@ -24,6 +24,7 @@ def login():
         conn.close()
         
         if user:
+            session.permanent = True  # activa la duración definida en server.py
             session['username'] = user['username']
             session['role'] = user['role']
             session['company_id'] = user['company_id']  # Guarda el company_id en la sesión

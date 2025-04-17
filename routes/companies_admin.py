@@ -30,7 +30,7 @@ def admin_add_company():
 
         if len(company_name) > 100 or not re.match(r'^[\w\s\-]+$', company_name):
             flash("Nombre de compañía no válido")
-            return render_template('admin/admin_companies.html', company_name=company_name, owner=owner)
+            return render_template('admin/admin_companies.html', company_name=company_name, owner=owner,)
         
         if len(company_name) > 100 or not re.match(r'^[A-Za-z\s]+$', owner):
             flash("Nombre del propietario inválido")

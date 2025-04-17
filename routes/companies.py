@@ -1,4 +1,4 @@
-from flask import request, redirect, render_template, session
+from flask import request, redirect, render_template, session, flash, url_for
 from server import app
 from db import get_data_connection
 
@@ -35,6 +35,9 @@ def company_detail(company_id):
     if request.method == 'POST':
         comment = request.form['comment']
         user = session.get('username')
+        if not comment or len(comment) > 500:
+            flash("Comentario inválido")
+            return redirect(url_for('company_detail', company_id=company_id))
         #conn.execute("INSERT INTO comments (company_id, user, comment) VALUES ("+str(company_id)+", '"+user+"', '"+comment+"')")
         conn.execute(
             "INSERT INTO comments (company_id, user, comment) VALUES (?, ?, ?)", 

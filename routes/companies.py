@@ -17,7 +17,18 @@ def list_companies():
     companies_list = []
     for company in companies:
         company_dict = dict(company)  # Convertir la fila a un diccionario
-        company_dict['comment_count'] = conn.execute("SELECT COUNT(*) FROM comments WHERE company_id = ?", (company_dict['id'],)).fetchone()[0]
+        try:
+            comment_count = conn.execute(
+                "SELECT COUNT(*) FROM comments WHERE company_id = ?", 
+                (company_dict['id'],)
+            ).fetchone()[0]
+            # Validación CWE-20: forzar a entero y controlar rango
+            comment_count = int(comment_count)
+            if comment_count < 0 or comment_count > 100000:  # límite razonable
+                comment_count = 0
+        except (ValueError, TypeError):
+            comment_count = 0
+        company_dict['comment_count'] = comment_count
         companies_list.append(company_dict)
     
     conn.close()

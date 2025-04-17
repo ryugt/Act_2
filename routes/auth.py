@@ -9,8 +9,14 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        if not username or not password:
+            return render_template('auth/login.html', error="Username and password are required")
         conn = get_users_connection()
-        user = conn.execute("SELECT * FROM users WHERE username = '"+ username +"' AND password = '"+hash_password(password)+"'").fetchone()
+        #user = conn.execute("SELECT * FROM users WHERE username = '"+ username +"' AND password = '"+hash_password(password)+"'").fetchone()
+        user = conn.execute(
+            "SELECT * FROM users WHERE username = ? AND password = ?", 
+            (username, hash_password(password))
+        ).fetchone()
         conn.close()
         
         if user:

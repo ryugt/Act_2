@@ -22,15 +22,20 @@ def admin_add_company():
         owner = request.form['owner'].strip()
         if not company_name or not owner:
             flash("Campos obligatorios")
-            return redirect(url_for('admin_add_company'))
+            return render_template(
+                'admin/admin_companies.html',
+                company_name=company_name,
+                owner=owner
+            )
 
         if len(company_name) > 100 or not re.match(r'^[\w\s\-]+$', company_name):
             flash("Nombre de compañía no válido")
-            return redirect(url_for('admin_add_company'))
+            return render_template('admin/admin_companies.html', company_name=company_name, owner=owner)
         
         if len(company_name) > 100 or not re.match(r'^[A-Za-z\s]+$', owner):
             flash("Nombre del propietario inválido")
-            return redirect(url_for('admin_add_company'))
+            return render_template('admin/admin_companies.html', company_name=company_name, owner=owner)
+        
         company_name = html.escape(company_name)
         owner = html.escape(owner)
         conn = get_data_connection()

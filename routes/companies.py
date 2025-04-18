@@ -34,8 +34,6 @@ def list_companies():
     conn.close()
     return render_template('companies/home.html', companies=companies_list)
 
-
-
 @app.route('/companies/<int:company_id>', methods=['GET', 'POST'])
 def company_detail(company_id):
     if 'username' not in session:
@@ -54,6 +52,9 @@ def company_detail(company_id):
         return "Access denied", 403
 
     if request.method == 'POST':
+        if session.get('role') not in ['user', 'owner', 'admin']:
+            conn.close()
+            return "Access denied", 403
         comment = request.form['comment']
         user = session.get('username')
         if not comment or len(comment) > 500:
@@ -104,8 +105,13 @@ def edit_company(company_id):
         conn.close()
         return "Access denied", 403
     if request.method == 'POST':
-        new_name = request.form['company_name']
-        new_description = request.form['description']
+        new_name = request.form.get('company_name', '').strip()
+        new_description = request.form.get('description', '').strip()
+
+        if not new_name or not new_description:
+            flash("Todos los campos son obligatorios")
+            return redirect(url_for('edit_company', company_id=company_id))
+
         #conn.execute("UPDATE companies SET name = '"+new_name+"', description = '"+new_description+"' WHERE id = "+str(company_id))
         conn.execute(
             "UPDATE companies SET name = ?, description = ? WHERE id = ?", 

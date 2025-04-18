@@ -96,7 +96,7 @@ def edit_company(company_id):
     if 'username' not in session:
         return redirect('/')
     conn = get_data_connection()
-    company = conn.execute("SELECT * FROM companies WHERE id = ?", (company_id)).fetchone()
+    company = conn.execute("SELECT * FROM companies WHERE id = ?", (company_id,)).fetchone()
     if not company:
         conn.close()
         return "Company not found", 404

@@ -24,6 +24,8 @@ This system simulates a realistic business environment and includes features suc
 - **Bootstrap 5** for responsive UI
 - **Jinja2** for templating
 - **JavaScript** for interactivity
+- **bcrypt** secure password hashing
+- **Flask-WTF** CSRF protection and form security
 
 ---
 

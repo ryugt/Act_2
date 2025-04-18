@@ -41,8 +41,18 @@ def company_detail(company_id):
     if 'username' not in session:
         return redirect('/login')
     conn = get_data_connection()
-    company = conn.execute("SELECT * FROM companies WHERE id = " + str(company_id)).fetchone()
-    comments = conn.execute("SELECT * FROM comments WHERE company_id = " + str(company_id)).fetchall()
+    company = conn.execute("SELECT * FROM companies WHERE id = ?", (company_id,)).fetchone()
+    comments = conn.execute("SELECT * FROM comments WHERE company_id = ?", (company_id,)).fetchall()
+    
+    if not company:
+        conn.close()
+        return "Company not found", 404
+
+    # Validación de acceso
+    if session.get('role') == 'owner' and company['owner'] != session['username']:
+        conn.close()
+        return "Access denied", 403
+
     if request.method == 'POST':
         comment = request.form['comment']
         user = session.get('username')
@@ -81,13 +91,12 @@ def register_company():
         return redirect('/companies')
     return render_template('companies/register_company.html')
 
-
 @app.route('/companies/<int:company_id>/edit', methods=['GET', 'POST'])
 def edit_company(company_id):
     if 'username' not in session:
         return redirect('/')
     conn = get_data_connection()
-    company = conn.execute("SELECT * FROM companies WHERE id = "+ str(company_id)).fetchone()
+    company = conn.execute("SELECT * FROM companies WHERE id = ?", (company_id)).fetchone()
     if not company:
         conn.close()
         return "Company not found", 404

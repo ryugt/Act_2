@@ -51,15 +51,29 @@ def admin_add_company():
 
 @app.route('/admin/companies/delete', methods=['POST'])
 def delete_company():
-    if session.get('role') != 'admin':
-        return "Access denied", 403
-    company = request.form['company']
-    conn = get_data_connection()
-    if not company.isdigit():
-        return "ID inválido", 400
+    #if session.get('role') != 'admin':
+    #    return "Access denied", 403
+    #company = request.form['company']
+    company_id = request.form.get('company')
     
-    conn.execute("DELETE FROM companies WHERE id = ?", (company,))
-    conn.execute("DELETE FROM comments WHERE company_id = ?", (company,))
+    if not company_id or not company_id.isdigit():
+        return "Invalid company ID", 400
+    
+    conn = get_data_connection()
+
+    # Validar que la compañía exista
+    company = conn.execute("SELECT * FROM companies WHERE id = ?", (company_id,)).fetchone()
+    if not company:
+        conn.close()
+        return "Company not found", 404
+    
+    # Solo admin puede eliminar
+    if session.get('role') != 'admin':
+        conn.close()
+        return "Access denied", 403
+
+    conn.execute("DELETE FROM companies WHERE id = ?", (company_id,))
+    conn.execute("DELETE FROM comments WHERE company_id = ?", (company_id,))
     #conn.execute("DELETE FROM companies WHERE id = "+ company)
     #conn.execute("DELETE FROM comments WHERE company_id = " + company)
     conn.commit()

@@ -1,6 +1,5 @@
 import sqlite3
 import os
-#import hashlib
 import bcrypt
 
 DB_DIR = os.path.join(os.path.dirname(__file__), '..', 'db')
@@ -8,7 +7,6 @@ USERS_DB = os.path.join(DB_DIR, 'users.db')
 DATA_DB = os.path.join(DB_DIR, 'data.db')
 
 def hash_password(password):
-    #return hashlib.md5(password.encode()).hexdigest()
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed.decode('utf-8')

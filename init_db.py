@@ -1,5 +1,6 @@
 import sqlite3
-import hashlib
+#import hashlib
+import bcrypt
 import os
 
 db_dir = os.path.join(os.path.dirname(__file__), 'db')
@@ -8,8 +9,13 @@ os.makedirs(db_dir, exist_ok=True)
 users_db = os.path.join(db_dir, 'users.db')
 data_db = os.path.join(db_dir, 'data.db')
 
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+#def hash_password(password):
+#    return hashlib.sha256(password.encode()).hexdigest()
+# Hashing seguro de contraseña con bcrypt
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 # Crear base de datos de usuarios
 conn = sqlite3.connect(users_db)

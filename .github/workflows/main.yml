@@ -18,8 +18,10 @@ jobs:
           
       - name: Zip application code
         run: |
-          # Empaqueta toda la app en un ZIP
-          zip -r app.zip /
+          mkdir -p artifact
+          zip -r artifact/app.zip main.py server.py requirements.txt \
+            db/ routes/ templates/ static/ \
+            -x "**/__pycache__/**" "**/*.pyc" "**/.git/**" "**/.github/**"
 
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.7

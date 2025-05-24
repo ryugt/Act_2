@@ -24,7 +24,7 @@ jobs:
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.7
         with:
-          appname: 'App'
+          appname: 'APP_02'
           createprofile: true
           filepath: 'Appzip'
           version: '${{ github.sha }}'

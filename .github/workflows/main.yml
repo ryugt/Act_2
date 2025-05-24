@@ -1,0 +1,78 @@
+# .github/workflows/main.yml
+name: CI DevSecOps Pipeline
+
+on:
+  push:
+    branches: ['**']     # en cualquier rama
+  pull_request:
+    branches: [ main ]   # en PRs contra main
+
+jobs:
+  veracode-scan:
+    name: 🔒 Veracode Upload & Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+          
+      - name: Zip application code
+        run: |
+          # Empaqueta toda la app en un ZIP
+          zip -r app.zip /
+
+      - name: Veracode Upload And Scan
+        uses: veracode/veracode-uploadandscan-action@0.2.7
+        with:
+          appname: 'App'
+          createprofile: true
+          filepath: 'Appzip'
+          version: '${{ github.sha }}'
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          # fail-on-severity HIGH es el comportamiento por defecto
+
+  test-and-lint:
+    name: ✅ Test & Lint
+    needs: veracode-scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m venv .venv
+          # activa el venv usando POSIX source
+          . .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r Company_Management_app/requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        shell: bash
+        run: |
+          . .venv/bin/activate
+          pytest -q || true
+
+  deploy:
+    name: 🚀 Deploy to Render
+    needs: test-and-lint
+    if: github.ref == 'refs/heads/main' && needs.veracode-scan.result == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy to Render
+        run: |
+          curl -X POST https://api.render.com/deploy/srv-<TU-SRV-ID> \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
